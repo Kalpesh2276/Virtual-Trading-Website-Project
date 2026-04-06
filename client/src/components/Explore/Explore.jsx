@@ -122,19 +122,21 @@ function Explore() {
             {renderStockGrid(mostBought, 'No data available for most bought.')}
           </section>
 
-          <section className="explore-section">
-            <div className="section-header">
-              <h2>Top Gainers</h2>
-            </div>
-            {renderStockList(topGainers, 'No gainers available currently.')}
-          </section>
+          <div className="explore-split-section">
+            <section className="explore-section">
+              <div className="section-header">
+                <h2>Top Gainers</h2>
+              </div>
+              {renderStockList(topGainers, 'No gainers available currently.')}
+            </section>
 
-          <section className="explore-section">
-            <div className="section-header">
-              <h2>Top Losers</h2>
-            </div>
-            {renderStockList(topLosers, 'No losers available currently.')}
-          </section>
+            <section className="explore-section">
+              <div className="section-header">
+                <h2>Top Losers</h2>
+              </div>
+              {renderStockList(topLosers, 'No losers available currently.')}
+            </section>
+          </div>
         </div>
 
         {/* Right Column - User Investments */}

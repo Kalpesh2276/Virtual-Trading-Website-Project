@@ -12,6 +12,12 @@
   margin-bottom: 2rem;
 }
 
+.explore-split-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+}
+
 .section-header {
   margin-bottom: 1.5rem;
 }
@@ -143,6 +149,9 @@
 
 @media (max-width: 992px) {
   .explore-grid {
+    grid-template-columns: 1fr;
+  }
+  .explore-split-section {
     grid-template-columns: 1fr;
   }
 }
