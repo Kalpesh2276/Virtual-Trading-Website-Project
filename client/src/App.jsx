@@ -3,8 +3,9 @@ import { useAuth } from './context/AuthContext';
 import Login from './components/Auth/Login';
 import Signup from './components/Auth/Signup';
 import Navbar from './components/Layout/Navbar';
-import Sidebar from './components/Layout/Sidebar';
-import Dashboard from './components/Dashboard/Dashboard';
+import IndicesTicker from './components/Layout/IndicesTicker';
+import Explore from './components/Explore/Explore';
+import Watchlist from './components/Watchlist/Watchlist';
 import StockSearch from './components/Stock/StockSearch';
 import StockDetail from './components/Stock/StockDetail';
 import Portfolio from './components/Portfolio/Portfolio';
@@ -39,9 +40,9 @@ function PublicRoute({ children }) {
 function AppLayout({ children }) {
   return (
     <div className="app-layout">
-      <Sidebar />
       <div className="app-main">
         <Navbar />
+        <IndicesTicker />
         <main className="app-content">
           {children}
         </main>
@@ -60,7 +61,7 @@ function App() {
       <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
       <Route path="/" element={
         <ProtectedRoute>
-          <AppLayout><Dashboard /></AppLayout>
+          <AppLayout><Explore /></AppLayout>
         </ProtectedRoute>
       } />
       <Route path="/search" element={
@@ -76,6 +77,11 @@ function App() {
       <Route path="/portfolio" element={
         <ProtectedRoute>
           <AppLayout><Portfolio /></AppLayout>
+        </ProtectedRoute>
+      } />
+      <Route path="/watchlist" element={
+        <ProtectedRoute>
+          <AppLayout><Watchlist /></AppLayout>
         </ProtectedRoute>
       } />
       <Route path="/transactions" element={
