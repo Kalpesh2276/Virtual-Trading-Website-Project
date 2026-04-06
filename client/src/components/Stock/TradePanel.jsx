@@ -96,11 +96,6 @@ function TradePanel({ quote, onSuccess }) {
         )}
 
         <form onSubmit={handleSubmit} className="trade-panel-form">
-          <div className="tp-order-types">
-            <span className="badge badge-outline active">Delivery</span>
-            <span className="badge badge-outline text-disabled">Intraday</span>
-          </div>
-
           <div className="tp-input-group">
             <label>Qty <span className="text-disabled">{getExchange(quote.symbol)}</span></label>
             <input
