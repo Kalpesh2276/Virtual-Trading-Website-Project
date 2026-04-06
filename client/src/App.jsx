@@ -45,6 +45,9 @@ function AppLayout({ children }) {
         <main className="app-content">
           {children}
         </main>
+        <footer className="app-footer">
+          &copy; 2026 Kalpesh Warke. All rights reserved.
+        </footer>
       </div>
     </div>
   );

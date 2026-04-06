@@ -29,3 +29,12 @@
     padding: 1rem;
   }
 }
+
+.app-footer {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  color: var(--text-tertiary);
+  font-size: 0.875rem;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: auto;
+}
