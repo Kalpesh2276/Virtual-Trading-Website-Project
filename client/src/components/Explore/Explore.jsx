@@ -48,6 +48,39 @@ function Explore() {
   const totalPnL = portfolioSummary?.totalPnL || 0;
   const todayPnL = portfolioSummary?.todayPnL || 0;
 
+  // Derive subsets from popular stocks
+  const mostBought = popularStocks.slice(0, 4);
+  const topGainers = [...popularStocks].filter(s => s.change > 0).sort((a, b) => b.changePercent - a.changePercent).slice(0, 4);
+  const topLosers = [...popularStocks].filter(s => s.change < 0).sort((a, b) => a.changePercent - b.changePercent).slice(0, 4);
+
+  const renderStockGrid = (stocks, emptyMessage) => {
+    if (!stocks || stocks.length === 0) return <p className="text-secondary">{emptyMessage}</p>;
+    return (
+      <div className="popular-stocks-grid">
+        {stocks.map((stock) => {
+          const isUp = stock.change >= 0;
+          return (
+            <button
+              key={stock.symbol}
+              className="stock-card"
+              onClick={() => navigate(`/stocks/${encodeURIComponent(stock.symbol)}`)}
+            >
+              <div className="stock-card-top">
+                <span className="stock-symbol">{stock.symbol.replace(/\.(NS|BO)$/, '')}</span>
+              </div>
+              <div className="stock-card-bottom">
+                <span className="stock-price">{formatCurrency(stock.price)}</span>
+                <span className={`stock-change ${isUp ? 'text-profit' : 'text-loss'}`}>
+                  {isUp ? '+' : ''}{stock.changePercent?.toFixed(2)}%
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="explore-page animate-fadeIn">
       <div className="explore-grid">
@@ -57,29 +90,21 @@ function Explore() {
             <div className="section-header">
               <h2>Most Bought on TradeSAFE</h2>
             </div>
-            
-            <div className="popular-stocks-grid">
-              {popularStocks.map((stock) => {
-                const isUp = stock.change >= 0;
-                return (
-                  <button
-                    key={stock.symbol}
-                    className="stock-card"
-                    onClick={() => navigate(`/stocks/${encodeURIComponent(stock.symbol)}`)}
-                  >
-                    <div className="stock-card-top">
-                      <span className="stock-symbol">{stock.symbol.replace(/\.(NS|BO)$/, '')}</span>
-                    </div>
-                    <div className="stock-card-bottom">
-                      <span className="stock-price">{formatCurrency(stock.price)}</span>
-                      <span className={`stock-change ${isUp ? 'text-profit' : 'text-loss'}`}>
-                        {isUp ? '+' : ''}{stock.changePercent?.toFixed(2)}%
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
+            {renderStockGrid(mostBought, 'No data available for most bought.')}
+          </section>
+
+          <section className="explore-section">
+            <div className="section-header">
+              <h2>Top Gainers</h2>
             </div>
+            {renderStockGrid(topGainers, 'No gainers available currently.')}
+          </section>
+
+          <section className="explore-section">
+            <div className="section-header">
+              <h2>Top Losers</h2>
+            </div>
+            {renderStockGrid(topLosers, 'No losers available currently.')}
           </section>
         </div>
 
