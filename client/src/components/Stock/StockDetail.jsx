@@ -92,58 +92,72 @@ function StockDetail() {
         </div>
       </div>
 
-      {/* Trade Buttons */}
-      <div className="stock-trade-buttons">
-        <button className="btn btn-buy btn-lg" onClick={() => setTradeType('BUY')}>
-          <ShoppingCart size={18} />
-          Buy
-        </button>
-        <button className="btn btn-sell btn-lg" onClick={() => setTradeType('SELL')}>
-          <DollarSign size={18} />
-          Sell
-        </button>
-      </div>
+      {/* Layout Split */}
+      <div className="stock-detail-layout">
+        {/* Left Column */}
+        <div className="stock-detail-main">
+          {/* Chart */}
+          <div className="stock-chart-container card">
+            <StockChart symbol={decodeURIComponent(symbol)} />
+          </div>
 
-      {/* Content Layout */}
-      <div className="stock-content-grid">
-        {/* Chart */}
-        <div className="stock-chart-container card">
-          <StockChart symbol={decodeURIComponent(symbol)} />
+          {/* Key Stats */}
+          <div className="stock-stats-grid">
+            <div className="stock-stat">
+              <span className="stock-stat-label">Open</span>
+              <span className="stock-stat-value">{formatCurrency(quote.open)}</span>
+            </div>
+            <div className="stock-stat">
+              <span className="stock-stat-label">Previous Close</span>
+              <span className="stock-stat-value">{formatCurrency(quote.previousClose)}</span>
+            </div>
+            <div className="stock-stat">
+              <span className="stock-stat-label">Day High</span>
+              <span className="stock-stat-value text-profit">{formatCurrency(quote.dayHigh)}</span>
+            </div>
+            <div className="stock-stat">
+              <span className="stock-stat-label">Day Low</span>
+              <span className="stock-stat-value text-loss">{formatCurrency(quote.dayLow)}</span>
+            </div>
+            <div className="stock-stat">
+              <span className="stock-stat-label">Volume</span>
+              <span className="stock-stat-value">{formatVolume(quote.volume)}</span>
+            </div>
+            <div className="stock-stat">
+              <span className="stock-stat-label">Market Cap</span>
+              <span className="stock-stat-value">{formatCurrency(quote.marketCap, true)}</span>
+            </div>
+            <div className="stock-stat">
+              <span className="stock-stat-label">52W High</span>
+              <span className="stock-stat-value">{formatCurrency(quote.fiftyTwoWeekHigh)}</span>
+            </div>
+            <div className="stock-stat">
+              <span className="stock-stat-label">52W Low</span>
+              <span className="stock-stat-value">{formatCurrency(quote.fiftyTwoWeekLow)}</span>
+            </div>
+          </div>
         </div>
 
-        {/* Key Stats */}
-        <div className="stock-stats-grid">
-          <div className="stock-stat">
-            <span className="stock-stat-label">Open</span>
-            <span className="stock-stat-value">{formatCurrency(quote.open)}</span>
-          </div>
-          <div className="stock-stat">
-            <span className="stock-stat-label">Prev Close</span>
-            <span className="stock-stat-value">{formatCurrency(quote.previousClose)}</span>
-          </div>
-          <div className="stock-stat">
-            <span className="stock-stat-label">Day High</span>
-            <span className="stock-stat-value text-profit">{formatCurrency(quote.dayHigh)}</span>
-          </div>
-          <div className="stock-stat">
-            <span className="stock-stat-label">Day Low</span>
-            <span className="stock-stat-value text-loss">{formatCurrency(quote.dayLow)}</span>
-          </div>
-          <div className="stock-stat">
-            <span className="stock-stat-label">Volume</span>
-            <span className="stock-stat-value">{formatVolume(quote.volume)}</span>
-          </div>
-          <div className="stock-stat">
-            <span className="stock-stat-label">Market Cap</span>
-            <span className="stock-stat-value">{formatCurrency(quote.marketCap, true)}</span>
-          </div>
-          <div className="stock-stat">
-            <span className="stock-stat-label">52W High</span>
-            <span className="stock-stat-value">{formatCurrency(quote.fiftyTwoWeekHigh)}</span>
-          </div>
-          <div className="stock-stat">
-            <span className="stock-stat-label">52W Low</span>
-            <span className="stock-stat-value">{formatCurrency(quote.fiftyTwoWeekLow)}</span>
+        {/* Right Column */}
+        <div className="stock-detail-sidebar">
+          <div className="card stock-trade-card">
+            <h3>Trade {cleanSymbol(quote.symbol)}</h3>
+            <div className="stock-trade-card-price">
+              <span className="stock-price-large">{formatCurrency(quote.price)}</span>
+              <span className={`stock-change ${isProfit ? 'text-profit' : 'text-loss'}`}>
+                {isProfit ? '+' : ''}{quote.changePercent?.toFixed(2)}%
+              </span>
+            </div>
+            
+            <div className="stock-trade-buttons">
+              <button className="btn btn-buy btn-lg" onClick={() => setTradeType('BUY')}>
+                Buy
+              </button>
+              <button className="btn btn-sell btn-lg" onClick={() => setTradeType('SELL')}>
+                Sell
+              </button>
+            </div>
+            <p className="stock-trade-help">Invest in {quote.shortName}</p>
           </div>
         </div>
       </div>
