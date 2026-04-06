@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { stockAPI } from '../../services/api';
+import { stockAPI, watchlistAPI } from '../../services/api';
 import {
-  ArrowLeft, TrendingUp, TrendingDown, ShoppingCart, DollarSign,
-  BarChart3, ArrowUpRight, ArrowDownRight, Clock
+  ArrowLeft, BarChart3, ArrowUpRight, ArrowDownRight,
+  Bell, Bookmark, BookmarkCheck
 } from 'lucide-react';
-import { formatCurrency, formatPercent, formatVolume, cleanSymbol, getExchange, getPnLClass } from '../../utils/formatters';
+import { formatCurrency, formatPercent, formatVolume, cleanSymbol, getExchange } from '../../utils/formatters';
 import StockChart from './StockChart';
-import TradeModal from './TradeModal';
+import TradePanel from './TradePanel';
 import './Stock.css';
 
 function StockDetail() {
@@ -16,19 +16,33 @@ function StockDetail() {
   const [quote, setQuote] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [tradeType, setTradeType] = useState(null); // 'BUY' | 'SELL' | null
+  const [inWatchlist, setInWatchlist] = useState(false);
 
   useEffect(() => {
-    fetchQuote();
-    const interval = setInterval(fetchQuote, 30000);
+    fetchData();
+    const interval = setInterval(fetchQuoteOnly, 30000);
     return () => clearInterval(interval);
   }, [symbol]);
 
-  const fetchQuote = async () => {
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      const { data } = await stockAPI.getQuote(decodeURIComponent(symbol));
-      setQuote(data);
-      setError('');
+      const decodedSymbol = decodeURIComponent(symbol);
+      const [quoteRes, watchlistRes] = await Promise.allSettled([
+        stockAPI.getQuote(decodedSymbol),
+        watchlistAPI.get()
+      ]);
+
+      if (quoteRes.status === 'fulfilled') {
+        setQuote(quoteRes.value.data);
+        setError('');
+      } else {
+        throw new Error('Failed to fetch stock');
+      }
+
+      if (watchlistRes.status === 'fulfilled' && watchlistRes.value.data?.quotes) {
+        setInWatchlist(watchlistRes.value.data.quotes.some(s => s.symbol === decodedSymbol));
+      }
     } catch (err) {
       setError('Could not fetch stock data');
       console.error(err);
@@ -37,12 +51,36 @@ function StockDetail() {
     }
   };
 
+  const fetchQuoteOnly = async () => {
+    try {
+      const { data } = await stockAPI.getQuote(decodeURIComponent(symbol));
+      setQuote(data);
+    } catch (e) {
+      // ignore background sync errors
+    }
+  };
+
+  const toggleWatchlist = async () => {
+    const decodedSymbol = decodeURIComponent(symbol);
+    try {
+      if (inWatchlist) {
+        await watchlistAPI.remove(decodedSymbol);
+        setInWatchlist(false);
+      } else {
+        await watchlistAPI.add(decodedSymbol);
+        setInWatchlist(true);
+      }
+    } catch (e) {
+      console.error('Failed to toggle watchlist', e);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="stock-detail animate-fadeIn">
+      <div className="stock-detail-layout animate-fadeIn">
         <div className="loading-container">
           <div className="spinner"></div>
-          <p>Loading stock data...</p>
+          <p>Loading market data...</p>
         </div>
       </div>
     );
@@ -50,7 +88,7 @@ function StockDetail() {
 
   if (error || !quote) {
     return (
-      <div className="stock-detail animate-fadeIn">
+      <div className="stock-detail-layout animate-fadeIn">
         <button className="btn btn-ghost" onClick={() => navigate(-1)}>
           <ArrowLeft size={18} /> Back
         </button>
@@ -66,99 +104,91 @@ function StockDetail() {
   const isProfit = quote.change >= 0;
 
   return (
-    <div className="stock-detail animate-fadeIn">
-      <button className="btn btn-ghost stock-back-btn" onClick={() => navigate(-1)}>
-        <ArrowLeft size={18} /> Back
-      </button>
-
-      {/* Stock Header */}
-      <div className="stock-header">
-        <div className="stock-header-left">
-          <div className="stock-header-title">
-            <h1>{cleanSymbol(quote.symbol)}</h1>
-            <span className={`badge ${quote.symbol.endsWith('.NS') ? 'badge-nse' : 'badge-bse'}`}>
-              {getExchange(quote.symbol)}
-            </span>
-          </div>
-          <p className="stock-header-name">{quote.longName || quote.shortName}</p>
-        </div>
-        <div className="stock-header-right">
-          <h2 className="stock-header-price">{formatCurrency(quote.price)}</h2>
-          <div className={`stock-header-change ${isProfit ? 'change-profit' : 'change-loss'}`}>
-            {isProfit ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
-            <span>{formatCurrency(Math.abs(quote.change))}</span>
-            <span>({formatPercent(quote.changePercent)})</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Trade Buttons */}
-      <div className="stock-trade-buttons">
-        <button className="btn btn-buy btn-lg" onClick={() => setTradeType('BUY')}>
-          <ShoppingCart size={18} />
-          Buy
+    <div className="stock-detail-layout animate-fadeIn">
+      {/* LEFT COLUMN - Stock Info and Chart */}
+      <div className="stock-detail-main">
+        {/* Navigation */}
+        <button className="btn btn-ghost stock-back-btn" onClick={() => navigate(-1)}>
+          <ArrowLeft size={16} /> Explore
         </button>
-        <button className="btn btn-sell btn-lg" onClick={() => setTradeType('SELL')}>
-          <DollarSign size={18} />
-          Sell
-        </button>
+
+        {/* Header Block */}
+        <div className="sd-header-row">
+          <div className="sd-header-left">
+            <div className="sd-symbol-row">
+              <span className="sd-symbol">{cleanSymbol(quote.symbol)}</span>
+              <span className="sd-exchange">· {getExchange(quote.symbol)}</span>
+            </div>
+            <h1 className="sd-title">{quote.longName || quote.shortName}</h1>
+            <div className="sd-price-row">
+              <span className="sd-price">{formatCurrency(quote.price)}</span>
+              <span className={`sd-change ${isProfit ? 'text-profit' : 'text-loss'}`}>
+                {isProfit ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                {formatCurrency(Math.abs(quote.change))} ({formatPercent(quote.changePercent)}) 1D
+              </span>
+            </div>
+          </div>
+          
+          <div className="sd-header-actions">
+            <button className="btn btn-ghost btn-icon" title="Set Alert">
+              <Bell size={20} />
+            </button>
+            <button 
+              className="btn btn-ghost btn-icon" 
+              onClick={toggleWatchlist}
+              title={inWatchlist ? "Remove from Watchlist" : "Add to Watchlist"}
+            >
+              {inWatchlist ? <BookmarkCheck size={20} className="text-accent" /> : <Bookmark size={20} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Chart */}
+        <div className="stock-chart-container">
+          <StockChart symbol={quote.symbol} />
+        </div>
+
+        {/* Stats Grid */}
+        <div className="stock-stats-grid">
+          <div className="stock-stat">
+            <span className="stock-stat-label">Open</span>
+            <span className="stock-stat-value">{formatCurrency(quote.open)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">Prev Close</span>
+            <span className="stock-stat-value">{formatCurrency(quote.previousClose)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">Day High</span>
+            <span className="stock-stat-value text-profit">{formatCurrency(quote.dayHigh)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">Day Low</span>
+            <span className="stock-stat-value text-loss">{formatCurrency(quote.dayLow)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">Volume</span>
+            <span className="stock-stat-value">{formatVolume(quote.volume)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">Market Cap</span>
+            <span className="stock-stat-value">{formatCurrency(quote.marketCap, true)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">52W High</span>
+            <span className="stock-stat-value">{formatCurrency(quote.fiftyTwoWeekHigh)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">52W Low</span>
+            <span className="stock-stat-value">{formatCurrency(quote.fiftyTwoWeekLow)}</span>
+          </div>
+        </div>
       </div>
 
-      {/* Chart */}
-      <div className="stock-chart-container card">
-        <StockChart symbol={decodeURIComponent(symbol)} />
+      {/* RIGHT COLUMN - Trade Panel */}
+      <div className="stock-detail-sidebar">
+        <TradePanel quote={quote} onSuccess={fetchQuoteOnly} />
       </div>
-
-      {/* Key Stats */}
-      <div className="stock-stats-grid">
-        <div className="stock-stat">
-          <span className="stock-stat-label">Open</span>
-          <span className="stock-stat-value">{formatCurrency(quote.open)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">Previous Close</span>
-          <span className="stock-stat-value">{formatCurrency(quote.previousClose)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">Day High</span>
-          <span className="stock-stat-value text-profit">{formatCurrency(quote.dayHigh)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">Day Low</span>
-          <span className="stock-stat-value text-loss">{formatCurrency(quote.dayLow)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">Volume</span>
-          <span className="stock-stat-value">{formatVolume(quote.volume)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">Market Cap</span>
-          <span className="stock-stat-value">{formatCurrency(quote.marketCap, true)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">52W High</span>
-          <span className="stock-stat-value">{formatCurrency(quote.fiftyTwoWeekHigh)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">52W Low</span>
-          <span className="stock-stat-value">{formatCurrency(quote.fiftyTwoWeekLow)}</span>
-        </div>
-      </div>
-
-      {/* Trade Modal */}
-      {tradeType && (
-        <TradeModal
-          symbol={quote.symbol}
-          companyName={quote.shortName || quote.longName}
-          currentPrice={quote.price}
-          type={tradeType}
-          onClose={() => setTradeType(null)}
-          onSuccess={() => {
-            setTradeType(null);
-            fetchQuote();
-          }}
-        />
-      )}
     </div>
   );
 }
