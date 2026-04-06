@@ -81,6 +81,35 @@ function Explore() {
     );
   };
 
+  const renderStockList = (stocks, emptyMessage) => {
+    if (!stocks || stocks.length === 0) return <p className="text-secondary">{emptyMessage}</p>;
+    return (
+      <div className="vertical-stocks-list">
+        {stocks.map((stock) => {
+          const isUp = stock.change >= 0;
+          return (
+            <button
+              key={stock.symbol}
+              className="vertical-stock-item"
+              onClick={() => navigate(`/stocks/${encodeURIComponent(stock.symbol)}`)}
+            >
+              <div className="vertical-stock-left">
+                <span className="vertical-stock-symbol">{stock.symbol.replace(/\.(NS|BO)$/, '')}</span>
+                <span className="vertical-stock-name">{stock.shortName}</span>
+              </div>
+              <div className="vertical-stock-right">
+                <span className="stock-price">{formatCurrency(stock.price)}</span>
+                <span className={`stock-change ${isUp ? 'text-profit' : 'text-loss'}`}>
+                  {isUp ? '+' : ''}{stock.changePercent?.toFixed(2)}%
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="explore-page animate-fadeIn">
       <div className="explore-grid">
@@ -97,14 +126,14 @@ function Explore() {
             <div className="section-header">
               <h2>Top Gainers</h2>
             </div>
-            {renderStockGrid(topGainers, 'No gainers available currently.')}
+            {renderStockList(topGainers, 'No gainers available currently.')}
           </section>
 
           <section className="explore-section">
             <div className="section-header">
               <h2>Top Losers</h2>
             </div>
-            {renderStockGrid(topLosers, 'No losers available currently.')}
+            {renderStockList(topLosers, 'No losers available currently.')}
           </section>
         </div>
 

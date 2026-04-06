@@ -37,11 +37,26 @@ function IndicesTicker() {
 
   return (
     <div className="indices-ticker-container">
-      <div className="indices-ticker">
+      <div className="ticker-track">
         {indices.map((index) => {
           const isUp = index.change >= 0;
           return (
-            <div key={index.symbol} className="ticker-item">
+            <div key={`track1-${index.symbol}`} className="ticker-item">
+              <span className="ticker-name">{index.shortName}</span>
+              <span className="ticker-price">{formatNumber(index.price?.toFixed(2))}</span>
+              <span className={`ticker-change ${isUp ? 'text-profit' : 'text-loss'}`}>
+                {isUp ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+                {isUp ? '+' : ''}{index.change?.toFixed(2)} ({index.changePercent?.toFixed(2)}%)
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <div className="ticker-track" aria-hidden="true">
+        {indices.map((index) => {
+          const isUp = index.change >= 0;
+          return (
+            <div key={`track2-${index.symbol}`} className="ticker-item">
               <span className="ticker-name">{index.shortName}</span>
               <span className="ticker-price">{formatNumber(index.price?.toFixed(2))}</span>
               <span className={`ticker-change ${isUp ? 'text-profit' : 'text-loss'}`}>
