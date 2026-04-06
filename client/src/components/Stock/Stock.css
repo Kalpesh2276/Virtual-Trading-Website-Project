@@ -141,10 +141,7 @@
   font-size: 2rem;
   font-weight: 900;
   letter-spacing: -0.03em;
-  background: var(--accent-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
 }
 
 .stock-header-name {
@@ -187,10 +184,18 @@
   max-width: 200px;
 }
 
+/* Layout Grid for Chart and Stats */
+.stock-content-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
 /* Chart Container */
 .stock-chart-container {
-  margin-bottom: 1.5rem;
   padding: 1.5rem;
+  height: 100%;
 }
 
 .stock-chart {
@@ -235,8 +240,9 @@
 /* Stats Grid */
 .stock-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.75rem;
+  align-content: start;
 }
 
 .stock-stat {
@@ -411,6 +417,10 @@
 
   .stock-header-right {
     text-align: left;
+  }
+
+  .stock-content-grid {
+    grid-template-columns: 1fr;
   }
 
   .stock-stats-grid {

@@ -104,44 +104,47 @@ function StockDetail() {
         </button>
       </div>
 
-      {/* Chart */}
-      <div className="stock-chart-container card">
-        <StockChart symbol={decodeURIComponent(symbol)} />
-      </div>
+      {/* Content Layout */}
+      <div className="stock-content-grid">
+        {/* Chart */}
+        <div className="stock-chart-container card">
+          <StockChart symbol={decodeURIComponent(symbol)} />
+        </div>
 
-      {/* Key Stats */}
-      <div className="stock-stats-grid">
-        <div className="stock-stat">
-          <span className="stock-stat-label">Open</span>
-          <span className="stock-stat-value">{formatCurrency(quote.open)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">Previous Close</span>
-          <span className="stock-stat-value">{formatCurrency(quote.previousClose)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">Day High</span>
-          <span className="stock-stat-value text-profit">{formatCurrency(quote.dayHigh)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">Day Low</span>
-          <span className="stock-stat-value text-loss">{formatCurrency(quote.dayLow)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">Volume</span>
-          <span className="stock-stat-value">{formatVolume(quote.volume)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">Market Cap</span>
-          <span className="stock-stat-value">{formatCurrency(quote.marketCap, true)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">52W High</span>
-          <span className="stock-stat-value">{formatCurrency(quote.fiftyTwoWeekHigh)}</span>
-        </div>
-        <div className="stock-stat">
-          <span className="stock-stat-label">52W Low</span>
-          <span className="stock-stat-value">{formatCurrency(quote.fiftyTwoWeekLow)}</span>
+        {/* Key Stats */}
+        <div className="stock-stats-grid">
+          <div className="stock-stat">
+            <span className="stock-stat-label">Open</span>
+            <span className="stock-stat-value">{formatCurrency(quote.open)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">Prev Close</span>
+            <span className="stock-stat-value">{formatCurrency(quote.previousClose)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">Day High</span>
+            <span className="stock-stat-value text-profit">{formatCurrency(quote.dayHigh)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">Day Low</span>
+            <span className="stock-stat-value text-loss">{formatCurrency(quote.dayLow)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">Volume</span>
+            <span className="stock-stat-value">{formatVolume(quote.volume)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">Market Cap</span>
+            <span className="stock-stat-value">{formatCurrency(quote.marketCap, true)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">52W High</span>
+            <span className="stock-stat-value">{formatCurrency(quote.fiftyTwoWeekHigh)}</span>
+          </div>
+          <div className="stock-stat">
+            <span className="stock-stat-label">52W Low</span>
+            <span className="stock-stat-value">{formatCurrency(quote.fiftyTwoWeekLow)}</span>
+          </div>
         </div>
       </div>
 
