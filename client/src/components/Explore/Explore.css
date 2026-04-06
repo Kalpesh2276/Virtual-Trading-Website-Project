@@ -184,6 +184,8 @@
 .vertical-stock-left {
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
   gap: 0.25rem;
 }
 
