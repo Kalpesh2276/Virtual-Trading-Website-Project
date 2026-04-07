@@ -5,7 +5,7 @@ import { getMultipleQuotes } from '../services/stockService.js';
 
 const router = express.Router();
 
-// GET /api/portfolio - Get user's portfolio with live prices
+// Get user's portfolio with live prices
 router.get('/', auth, async (req, res) => {
   try {
     const holdings = await Portfolio.find({
