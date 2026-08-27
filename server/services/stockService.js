@@ -39,7 +39,13 @@ export async function getQuote(symbol) {
   if (cached) return cached;
 
   try {
-    const quote = await yahooFinance.quote(symbol);
+    let quote;
+    try {
+      quote = await yahooFinance.quote(symbol);
+    } catch (err) {
+      if (err.name === 'FailedYahooValidationError' && err.result) quote = err.result;
+      else throw err;
+    }
     if (!quote) {
       throw new Error(`Yahoo Finance returned empty quote for ${symbol}`);
     }
@@ -79,7 +85,13 @@ export async function searchStocks(query) {
   if (cached) return cached;
 
   try {
-    const result = await yahooFinance.search(query, { newsCount: 0, quotesCount: 20 });
+    let result;
+    try {
+      result = await yahooFinance.search(query, { newsCount: 0, quotesCount: 20 });
+    } catch (err) {
+      if (err.name === 'FailedYahooValidationError' && err.result) result = err.result;
+      else throw err;
+    }
     
     // Filter for Indian stocks (NSE: .NS, BSE: .BO) and equity types
     let quotes = (result.quotes || [])
@@ -102,9 +114,10 @@ export async function searchStocks(query) {
       const nseSym = query.toUpperCase() + '.NS';
       const bseSym = query.toUpperCase() + '.BO';
       try {
+        const catchYfError = (e) => (e.name === 'FailedYahooValidationError' && e.result) ? e.result : Promise.reject(e);
         const [nseQuote, bseQuote] = await Promise.allSettled([
-          yahooFinance.quote(nseSym),
-          yahooFinance.quote(bseSym),
+          yahooFinance.quote(nseSym).catch(catchYfError),
+          yahooFinance.quote(bseSym).catch(catchYfError),
         ]);
         if (nseQuote.status === 'fulfilled' && nseQuote.value) {
           quotes.push({
@@ -185,11 +198,17 @@ export async function getChartData(symbol, range = '1mo') {
         interval = '1d';
     }
 
-    const result = await yahooFinance.chart(symbol, {
-      period1,
-      period2: now,
-      interval,
-    });
+    let result;
+    try {
+      result = await yahooFinance.chart(symbol, {
+        period1,
+        period2: now,
+        interval,
+      });
+    } catch (err) {
+      if (err.name === 'FailedYahooValidationError' && err.result) result = err.result;
+      else throw err;
+    }
 
     const data = (result.quotes || []).map(q => ({
       date: q.date,
@@ -272,7 +291,13 @@ export async function getIndices() {
   try {
     const promises = INDIAN_INDICES.map(async (index) => {
       try {
-        const quote = await yahooFinance.quote(index.symbol);
+        let quote;
+        try {
+          quote = await yahooFinance.quote(index.symbol);
+        } catch (err) {
+          if (err.name === 'FailedYahooValidationError' && err.result) quote = err.result;
+          else throw err;
+        }
         return {
           symbol: index.symbol,
           name: index.name,
