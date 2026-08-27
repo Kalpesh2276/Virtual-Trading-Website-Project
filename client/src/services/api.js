@@ -36,14 +36,35 @@ export const authAPI = {
   getMe: () => api.get('/auth/me'),
 };
 
-// Stock API
+// Stock API — fetched directly from the visitor's browser via Yahoo Finance.
+// Falls back to the backend API if CORS proxies fail.
+import * as yahooFinance from './yahooFinance';
+
 export const stockAPI = {
-  search: (query) => api.get(`/stocks/search?q=${encodeURIComponent(query)}`),
-  getQuote: (symbol) => api.get(`/stocks/quote/${encodeURIComponent(symbol)}`),
+  search: (query) =>
+    yahooFinance.search(query)
+      .then((data) => ({ data }))
+      .catch(() => api.get(`/stocks/search?q=${encodeURIComponent(query)}`)),
+
+  getQuote: (symbol) =>
+    yahooFinance.getQuote(symbol)
+      .then((data) => ({ data }))
+      .catch(() => api.get(`/stocks/quote/${encodeURIComponent(symbol)}`)),
+
   getHistory: (symbol, range = '1mo') =>
-    api.get(`/stocks/history/${encodeURIComponent(symbol)}?range=${range}`),
-  getPopular: () => api.get('/stocks/popular'),
-  getIndices: () => api.get('/stocks/indices'),
+    yahooFinance.getHistory(symbol, range)
+      .then((data) => ({ data }))
+      .catch(() => api.get(`/stocks/history/${encodeURIComponent(symbol)}?range=${range}`)),
+
+  getPopular: () =>
+    yahooFinance.getPopular()
+      .then((data) => ({ data }))
+      .catch(() => api.get('/stocks/popular')),
+
+  getIndices: () =>
+    yahooFinance.getIndices()
+      .then((data) => ({ data }))
+      .catch(() => api.get('/stocks/indices')),
 };
 
 // Portfolio API
