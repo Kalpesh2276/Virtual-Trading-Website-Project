@@ -5,8 +5,9 @@
  */
 
 const CORS_PROXIES = [
-  'https://corsproxy.io/?',
-  'https://api.allorigins.win/raw?url=',
+  { prefix: 'https://corsproxy.io/?',              encode: false },
+  { prefix: 'https://api.allorigins.win/raw?url=',  encode: true },
+  { prefix: 'https://api.codetabs.com/v1/proxy?quest=', encode: true },
 ];
 
 const YAHOO_BASE = 'https://query2.finance.yahoo.com';
@@ -31,9 +32,12 @@ async function fetchYahoo(path) {
 
   for (const proxy of CORS_PROXIES) {
     try {
-      const res = await fetch(proxy + encodeURIComponent(url));
+      const proxyUrl = proxy.prefix + (proxy.encode ? encodeURIComponent(url) : url);
+      const res = await fetch(proxyUrl);
       if (!res.ok) continue;
-      return await res.json();
+      const json = await res.json();
+      // Basic sanity check — Yahoo always returns an object
+      if (json && typeof json === 'object') return json;
     } catch {
       continue;
     }
