@@ -21,12 +21,12 @@ function Explore() {
 
   const fetchData = async () => {
     try {
-      const [summaryRes, popularRes] = await Promise.all([
+      const [summaryRes, popularRes] = await Promise.allSettled([
         portfolioAPI.getSummary(),
         stockAPI.getPopular()
       ]);
-      setPortfolioSummary(summaryRes.data);
-      setPopularStocks(popularRes.data);
+      if (summaryRes.status === 'fulfilled') setPortfolioSummary(summaryRes.value.data);
+      if (popularRes.status === 'fulfilled') setPopularStocks(popularRes.value.data || []);
     } catch (err) {
       console.error('Explore fetch error:', err);
     } finally {
